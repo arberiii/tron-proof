@@ -14,9 +14,6 @@ type leaf struct {
 	right *leaf
 }
 
-
-
-
 func CreateMerkleTree(hashes [][]byte) *MerkleTree {
 	m := &MerkleTree{}
 	leaves := m.createLeaves(hashes)
@@ -36,7 +33,7 @@ func (m *MerkleTree) createParentLeaves(list []*leaf) []*leaf {
 		if i+1 < length {
 			ret = append(ret, m.createLeaf2(list[i], list[i+1]))
 		} else {
-			ret = append(ret, list[i])
+			ret = append(ret, m.createLeaf1(list[i].Hash))
 		}
 	}
 	return ret
@@ -78,4 +75,8 @@ func (m *MerkleTree) createLeaf2(left, right *leaf) *leaf {
 func computeHash(left, right []byte) []byte {
 	h := sha256.Sum256([]byte(string(left[:]) + string(right[:])))
 	return h[:]
+}
+
+func (m *MerkleTree) Root() []byte {
+	return m.Leaves[len(m.Leaves)-1].Hash
 }
