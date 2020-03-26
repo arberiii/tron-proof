@@ -6,6 +6,7 @@ import (
 
 type MerkleTree struct {
 	Leaves []*leaf
+	Size   int
 }
 
 type leaf struct {
@@ -17,11 +18,12 @@ type leaf struct {
 func CreateMerkleTree(hashes [][]byte) *MerkleTree {
 	m := &MerkleTree{}
 	leaves := m.createLeaves(hashes)
-
+	m.Leaves = append(m.Leaves, leaves...)
 	for len(leaves) > 1 {
 		leaves = m.createParentLeaves(leaves)
+		m.Leaves = append(m.Leaves, leaves...)
 	}
-
+	m.Size = len(hashes)
 	return m
 }
 
@@ -45,8 +47,10 @@ func (m *MerkleTree) createLeaves(list [][]byte) []*leaf {
 	length := len(list)
 	for i := 0; i < length; i += step {
 		if i+1 < length {
+			m.Leaves = append(m.Leaves, m.createLeaf1(list[i]), m.createLeaf1(list[i+1]))
 			ret = append(ret, m.createLeaf2(m.createLeaf1(list[i]), m.createLeaf1(list[i+1])))
 		} else {
+			m.Leaves = append(m.Leaves, m.createLeaf1(list[i]))
 			ret = append(ret, m.createLeaf1(list[i]))
 		}
 	}
@@ -55,7 +59,6 @@ func (m *MerkleTree) createLeaves(list [][]byte) []*leaf {
 
 func (m *MerkleTree) createLeaf1(hash []byte) *leaf {
 	l := &leaf{Hash: hash}
-	m.Leaves = append(m.Leaves, l)
 	return l
 }
 
@@ -68,7 +71,6 @@ func (m *MerkleTree) createLeaf2(left, right *leaf) *leaf {
 	}
 	l.left = left
 	l.right = right
-	m.Leaves = append(m.Leaves, l)
 	return l
 }
 
